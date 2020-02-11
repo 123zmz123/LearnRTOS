@@ -20,7 +20,7 @@ SysTick_Handler        ; SysTick 中断只属于 cortex 系列
   
 CONTEXT_SWITCH ; 任务切换
   CPSID I           ;禁止中断
-  PUSH{R4 - R11}    ;将当前任务中的 R4-R11 寄存器内容存储到栈中，R0-R3根据约定只存储函数的参数，不参与中间过程的处理，因此没有必要做特殊处理。
+  PUSH{R4 - R11}    ;将当前任务中的 R4-R11 寄存器内容存储到栈中，R0-R3 LR PC PSR 是被自动存储到栈上的
   LDR R0,=currentPt ; currentPtr的地址被放置到R0寄存器中。
   LDR R1,[R0]       ;R1 = currentPtr->StackPtr
   STR SP,[R1]       ;SP = currentPtr->StackPtr

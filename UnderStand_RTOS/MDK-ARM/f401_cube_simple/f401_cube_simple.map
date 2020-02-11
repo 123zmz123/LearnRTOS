@@ -982,7 +982,7 @@ Image component sizes
         92         22          0         32        320       2783   ledcontrol.o
        400         56          0          0         64     382673   main.o
        282         34          0         12       1224       5703   oskernel.o
-       116          6          0          0          0        288   oskernel_1.o
+       116          6          0          0          0        284   oskernel_1.o
         36          8        404          0       1024        792   startup_stm32f401xe.o
        144         24          0         12          0       8469   stm32f4xx_hal.o
        172         14          0          0          0      33090   stm32f4xx_hal_cortex.o
@@ -996,7 +996,7 @@ Image component sizes
         16          6         24          4          0       1087   system_stm32f4xx.o
 
     ----------------------------------------------------------------------
-      3658        312        460         60       2636     827049   Object Totals
+      3658        312        460         60       2636     827045   Object Totals
          0          0         32          0          0          0   (incl. Generated)
         10          0          0          0          4          0   (incl. Padding)
 
@@ -1039,8 +1039,8 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-      3940        328        460         60       2636     825317   Grand Totals
-      3940        328        460         60       2636     825317   ELF Image Totals
+      3940        328        460         60       2636     825313   Grand Totals
+      3940        328        460         60       2636     825313   ELF Image Totals
       3940        328        460         60          0          0   ROM Totals
 
 ==============================================================================

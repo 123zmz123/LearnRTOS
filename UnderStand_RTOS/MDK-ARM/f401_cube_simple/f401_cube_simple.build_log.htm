@@ -27,7 +27,13 @@ Project File Date:  01/14/2020
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 6 (build 750)', folder: 'D:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'f401_cube_simple'
-"f401_cube_simple\f401_cube_simple.axf" - 0 Error(s), 0 Warning(s).
+assembling osKernel.s...
+..\Src\osKernel.s(70): warning: A1447W: Missing END directive at end of file, but found a label named END
+..\Src\osKernel.s(70): warning: A1581W: Added 2 bytes of padding at address 0x6e
+linking...
+Program Size: Code=3940 RO-data=460 RW-data=60 ZI-data=2636  
+FromELF: creating hex file...
+"f401_cube_simple\f401_cube_simple.axf" - 0 Error(s), 2 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -50,7 +56,7 @@ Package Vendor: Keil
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.3.0
-Build Time Elapsed:  00:00:01
+Build Time Elapsed:  00:00:02
 </pre>
 </body>
 </html>

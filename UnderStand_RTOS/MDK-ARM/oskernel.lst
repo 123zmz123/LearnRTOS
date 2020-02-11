@@ -48,13 +48,9 @@ ARM Macro Assembler    Page 1
    23 0000000E E92D 0FF0       PUSH{R4          - R11}      ;将当前任务中
                                                             的 R4-R11 寄存�
                                                             �内容存储到栈
-                                                            中，R0-R3根据�
-                                                            �定只存储函数
-                                                            的参数，不参�
-                                                            ��中间过程的�
-                                                            �理，因此没有
-                                                            必要做特殊处�
-                                                            ��。
+                                                            中，R0-R3 LR PC P
+                                                            SR 是被自动存�
+                                                            ��到栈上的
    24 00000012 4817            LDR              R0,=currentPt ; currentPtr的�
                                                             �址被放置到R0�
                                                             ��存器中。
@@ -63,16 +59,16 @@ ARM Macro Assembler    Page 1
    26 00000016 F8C1 D000       STR              SP,[R1]     ;SP = currentPtr->S
                                                             tackPtr
    27 0000001A 6849            LDR              R1,[R1,#4]  ;R1=currentPtr->nex
+                                                            tPtr
+   28 0000001C 6001            STR              R1,[R0]     ;currentPtr=current
+                                                            Ptr->nextPtr 
+   29 0000001E F8D1 D000       LDR              SP,[R1]     ;SP=currentPtr->Sta
 
 
 
 ARM Macro Assembler    Page 2 
 
 
-                                                            tPtr
-   28 0000001C 6001            STR              R1,[R0]     ;currentPtr=current
-                                                            Ptr->nextPtr 
-   29 0000001E F8D1 D000       LDR              SP,[R1]     ;SP=currentPtr->Sta
                                                             ckPtr 
    30 00000022 E8BD 0FF0       POP              {R4 - R11}  ;R4-R11 = currentPt
                                                             r->StackPtr contain
@@ -128,16 +124,16 @@ ARM Macro Assembler    Page 2
    58 00000068 B001            ADD              SP,SP,#4
    59 0000006A B662            CPSIE            I
    60 0000006C 4770            BX               LR
+   61 0000006E         
+   62 0000006E         
+   63 0000006E         
+   64 0000006E         
 
 
 
 ARM Macro Assembler    Page 3 
 
 
-   61 0000006E         
-   62 0000006E         
-   63 0000006E         
-   64 0000006E         
    65 0000006E         ALIGN
    66 0000006E         END
    67 0000006E         
