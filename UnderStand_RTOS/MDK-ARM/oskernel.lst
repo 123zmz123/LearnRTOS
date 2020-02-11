@@ -1,0 +1,275 @@
+
+
+
+ARM Macro Assembler    Page 1 
+
+
+    1 00000000         
+    2 00000000                 AREA             | .text|,CODE,READONLY,ALIGN=2
+    3 00000000                 THUMB
+    4 00000000                 PRESERVE8
+    5 00000000                 EXTERN           currentPt
+    6 00000000                 EXTERN           uwTick
+    7 00000000                 EXTERN           uwTickFreq
+    8 00000000                 IMPORT           HAL_IncTick
+    9 00000000                 IMPORT           GreenLedToggle
+   10 00000000                 IMPORT           osSchedulerRoundRobin
+   11 00000000                 EXPORT           SysTick_Handler ;使当前函�
+                                                            �可以被其他外
+                                                            部文件看到
+   12 00000000         ; EXPORT osSchedulerLauch
+   13 00000000         
+   14 00000000         ;任务切换写在 SysTick_Handler 中断中，此中�
+                       �属于ARM内核本身，不属于各大芯片厂商，�
+                       ��置简单反而有利于，系统移植。
+   15 00000000         SysTick_Handler                      ; SysTick 中断只
+                                                            属于 cortex 系�
+                                                            �
+   16 00000000 B500            push             {lr}        ;将当前函数返
+                                                            回地址(lr寄存�
+                                                            ��中存储)放入�
+                                                            ��中，然后才�
+                                                            �以进入新函数
+                                                            
+   17 00000002 F7FF FFFE       BL               HAL_IncTick ; HAL 中的计数�
+                                                            ��函数
+   18 00000006 F85D EB04       pop              {lr}        ;从计数器函数
+                                                            返回后，需要�
+                                                            ��函数返回地�
+                                                            �放到，lr寄存�
+                                                            ��中,使得中断�
+                                                            ��数可以正确�
+                                                            �回。
+   19 0000000A E00E            B                CONTEXT_SWITCH_C ;跳转到上�
+                                                            ��文切换函数
+   20 0000000C         
+   21 0000000C         CONTEXT_SWITCH                       ; 任务切换
+   22 0000000C B672            CPSID            I           ;禁止中断
+   23 0000000E E92D 0FF0       PUSH{R4          - R11}      ;将当前任务中
+                                                            的 R4-R11 寄存�
+                                                            �内容存储到栈
+                                                            中，R0-R3根据�
+                                                            �定只存储函数
+                                                            的参数，不参�
+                                                            ��中间过程的�
+                                                            �理，因此没有
+                                                            必要做特殊处�
+                                                            ��。
+   24 00000012 4817            LDR              R0,=currentPt ; currentPtr的�
+                                                            �址被放置到R0�
+                                                            ��存器中。
+   25 00000014 6801            LDR              R1,[R0]     ;R1 = currentPtr->S
+                                                            tackPtr
+   26 00000016 F8C1 D000       STR              SP,[R1]     ;SP = currentPtr->S
+                                                            tackPtr
+   27 0000001A 6849            LDR              R1,[R1,#4]  ;R1=currentPtr->nex
+
+
+
+ARM Macro Assembler    Page 2 
+
+
+                                                            tPtr
+   28 0000001C 6001            STR              R1,[R0]     ;currentPtr=current
+                                                            Ptr->nextPtr 
+   29 0000001E F8D1 D000       LDR              SP,[R1]     ;SP=currentPtr->Sta
+                                                            ckPtr 
+   30 00000022 E8BD 0FF0       POP              {R4 - R11}  ;R4-R11 = currentPt
+                                                            r->StackPtr contain
+                                                            s
+   31 00000026 B662            CPSIE            I           ;开启中断
+   32 00000028 4770            BX               LR          ;函数返回 LR所
+                                                            指向的地址中(
+                                                            中断中实际上�
+                                                            ��不是)但这条�
+                                                            ��令的确可以�
+                                                            �束中断调用。
+                                                            
+   33 0000002A         
+   34 0000002A         CONTEXT_SWITCH_C                     ; 任务切换 需�
+                                                            ��调用C函数，�
+                                                            ��简化相关。
+   35 0000002A B672            CPSID            I
+   36 0000002C E92D 0FF0       PUSH{R4          - R11}
+   37 00000030 480F            LDR              R0,=currentPt
+   38 00000032 6801            LDR              R1,[R0]     ; R1 = currentPtr->
+                                                            StackPtr
+   39 00000034 F8C1 D000       STR              SP,[R1]     ; currentPtr->Stack
+                                                            Ptr = SP
+   40 00000038 B501            PUSH             {R0,LR}
+   41 0000003A F7FF FFFE       BL               osSchedulerRoundRobin
+   42 0000003E E8BD 4001       POP              {R0,LR}
+   43 00000042 6801            LDR              R1,[R0]
+   44 00000044 F8D1 D000       LDR              SP,[R1]     ;SP=currentPtr->Sta
+                                                            ckPtr 
+   45 00000048 E8BD 0FF0       POP              {R4 - R11}  ;currentPtr->StackP
+                                                            tr storerage to R4-
+                                                            R11
+   46 0000004C B662            CPSIE            I
+   47 0000004E 4770            BX               LR
+   48 00000050         
+   49 00000050         osSchedulerLauch                     ; 此函数已经�
+                                                            �弃，在osKernel.
+                                                            c中有此函数的
+                                                            相同实现，我�
+                                                            ��是尽可能把�
+                                                            �数都写进一个
+                                                            C文件中
+   50 00000050 4807            LDR              R0, =currentPt
+   51 00000052 6802            LDR              R2, [R0]    ; R2 =currentPt    
+                                                               
+   52 00000054 F8D2 D000       LDR              SP, [R2]    ;SP = currentPt->st
+                                                            ackPt    
+   53 00000058 E8BD 0FF0       POP              {R4-R11}
+   54 0000005C BC0F            POP              {R0-R3}
+   55 0000005E F85D CB04       POP              {R12}
+   56 00000062 B001            ADD              SP,SP,#4
+   57 00000064 F85D EB04       POP              {LR}
+   58 00000068 B001            ADD              SP,SP,#4
+   59 0000006A B662            CPSIE            I
+   60 0000006C 4770            BX               LR
+
+
+
+ARM Macro Assembler    Page 3 
+
+
+   61 0000006E         
+   62 0000006E         
+   63 0000006E         
+   64 0000006E         
+   65 0000006E         ALIGN
+   66 0000006E         END
+   67 0000006E         
+   68 0000006E         
+   69 0000006E         
+                       
+              00 00 00000000 
+Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M4 --apcs=interw
+ork --depend=f401_cube_simple\oskernel_1.d -of401_cube_simple\oskernel_1.o -I.\
+RTE\_f401_cube_simple -ID:\zmz\AppData\Local\Arm\Packs\ARM\CMSIS\5.6.0\CMSIS\Co
+re\Include -ID:\zmz\AppData\Local\Arm\Packs\Keil\STM32F4xx_DFP\2.14.0\Drivers\C
+MSIS\Device\ST\STM32F4xx\Include --predefine="__MICROLIB SETA 1" --predefine="_
+_UVISION_VERSION SETA 528" --predefine="_RTE_ SETA 1" --predefine="STM32F401xE 
+SETA 1" --list=oskernel.lst ..\Src\osKernel.s
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+ .text 00000000
+
+Symbol:  .text
+   Definitions
+      At line 2 in file ..\Src\osKernel.s
+   Uses
+      None
+Comment:  .text unused
+ALIGN 0000006E
+
+Symbol: ALIGN
+   Definitions
+      At line 65 in file ..\Src\osKernel.s
+   Uses
+      None
+Comment: ALIGN unused
+CONTEXT_SWITCH 0000000C
+
+Symbol: CONTEXT_SWITCH
+   Definitions
+      At line 21 in file ..\Src\osKernel.s
+   Uses
+      None
+Comment: CONTEXT_SWITCH unused
+CONTEXT_SWITCH_C 0000002A
+
+Symbol: CONTEXT_SWITCH_C
+   Definitions
+      At line 34 in file ..\Src\osKernel.s
+   Uses
+      At line 19 in file ..\Src\osKernel.s
+Comment: CONTEXT_SWITCH_C used once
+END 0000006E
+
+Symbol: END
+   Definitions
+      At line 66 in file ..\Src\osKernel.s
+   Uses
+      None
+Comment: END unused
+SysTick_Handler 00000000
+
+Symbol: SysTick_Handler
+   Definitions
+      At line 15 in file ..\Src\osKernel.s
+   Uses
+      At line 11 in file ..\Src\osKernel.s
+Comment: SysTick_Handler used once
+osSchedulerLauch 00000050
+
+Symbol: osSchedulerLauch
+   Definitions
+      At line 49 in file ..\Src\osKernel.s
+   Uses
+      None
+Comment: osSchedulerLauch unused
+7 symbols
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+External symbols
+
+GreenLedToggle 00000000
+
+Symbol: GreenLedToggle
+   Definitions
+      At line 9 in file ..\Src\osKernel.s
+   Uses
+      None
+Comment: GreenLedToggle unused
+HAL_IncTick 00000000
+
+Symbol: HAL_IncTick
+   Definitions
+      At line 8 in file ..\Src\osKernel.s
+   Uses
+      At line 17 in file ..\Src\osKernel.s
+Comment: HAL_IncTick used once
+currentPt 00000000
+
+Symbol: currentPt
+   Definitions
+      At line 5 in file ..\Src\osKernel.s
+   Uses
+      At line 24 in file ..\Src\osKernel.s
+      At line 37 in file ..\Src\osKernel.s
+      At line 50 in file ..\Src\osKernel.s
+
+osSchedulerRoundRobin 00000000
+
+Symbol: osSchedulerRoundRobin
+   Definitions
+      At line 10 in file ..\Src\osKernel.s
+   Uses
+      At line 41 in file ..\Src\osKernel.s
+Comment: osSchedulerRoundRobin used once
+uwTick 00000000
+
+Symbol: uwTick
+   Definitions
+      At line 6 in file ..\Src\osKernel.s
+   Uses
+      None
+Comment: uwTick unused
+uwTickFreq 00000000
+
+Symbol: uwTickFreq
+   Definitions
+      At line 7 in file ..\Src\osKernel.s
+   Uses
+      None
+Comment: uwTickFreq unused
+6 symbols
+349 symbols in table
